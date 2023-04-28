@@ -6,11 +6,16 @@ import com.github.bhlangonijr.chesslib.Side;
 import com.github.bhlangonijr.chesslib.Square;
 
 public class EvaluationFunction {
+
     public static double apply(Board board) {
-        return materialBalance(board);
+        double score =
+                materialBalance(board) * 75
+                + explosiveSquare(board) * 10
+                + checkLove(board) * 15;
+        return score / 100;
     }
 
-    private static final int[] PIECE_VALUES = new int[]{1, 3, 3, 5, 9, 0};
+    private static final int[] PIECE_VALUES = new int[]{100, 300, 300, 500, 900, 0};
     private static double materialBalance(Board board) {
         int white = 0;
         int black = 0;
@@ -27,6 +32,31 @@ public class EvaluationFunction {
                 black += PIECE_VALUES[piece.getPieceType().ordinal()];
             }
         }
-        return (double) (white - black) / 39;
+        return (double) (white - black) / 3900;
+    }
+
+    private static double explosiveSquare(Board board) {
+        Piece piece = board.getPiece(Square.C4);
+        if (piece == Piece.NONE) {
+            return 0;
+        }
+        if (piece.getPieceSide() == Side.WHITE) {
+            return -1;
+        }
+        else {
+            return 1;
+        }
+    }
+
+    private static double checkLove(Board board) {
+        if (board.isKingAttacked()) {
+            if (board.getSideToMove() == Side.BLACK) {
+                return 1;
+            }
+            else {
+                return -1;
+            }
+        }
+        return 0;
     }
 }

@@ -122,9 +122,10 @@ public class MCTS {
             return 0;
         }
         else {
+            double evalWeight = 0.1;
             double reward = EvaluationFunction.apply(board);
             reward = reward * (side == Side.WHITE ? 1 : -1);
-            return reward;
+            return reward * evalWeight;
         }
     }
 
