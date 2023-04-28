@@ -1,7 +1,9 @@
 package org.amoseman.HSEngine;
 
 import com.github.bhlangonijr.chesslib.Board;
+import com.github.bhlangonijr.chesslib.Piece;
 import com.github.bhlangonijr.chesslib.Side;
+import com.github.bhlangonijr.chesslib.Square;
 import com.github.bhlangonijr.chesslib.move.Move;
 
 import java.util.List;
@@ -10,19 +12,24 @@ import java.util.Random;
 public class MCTS {
     private Node root;
     private Side side;
+    private int steps;
 
     public MCTS(String position) {
         this.root = new Node(position, null, null);
         Board board = new Board();
         board.loadFromFen(position);
         this.side = board.getSideToMove();
+        this.steps = 0;
     }
+
 
     public void step() {
         Node selectedNode = selection();
         Node expandedNode = expansion(selectedNode);
-        double reward = simulation(expandedNode);
+        int depth = (int) Math.log(steps + 1);
+        double reward = simulation(expandedNode, depth);
         backpropagation(expandedNode, reward);
+        steps++;
     }
 
     //---Stages---\\
@@ -39,6 +46,9 @@ public class MCTS {
         Board board = new Board();
         board.loadFromFen(node.POSITION);
         List<Move> legalMoves = board.legalMoves();
+        if (legalMoves.size() == 0) {
+            return node;
+        }
         Move move = legalMoves.get(node.CHILDREN.size());
         board.doMove(move);
         Node child = new Node(board.getFen(), node, move);
@@ -46,12 +56,13 @@ public class MCTS {
         return child;
     }
 
-    private double simulation(Node node) {
+    private double simulation(Node node, int depth) {
         Board board = new Board();
         board.loadFromFen(node.POSITION);
-        while (!isTerminal(board)) {
+        while (depth > 0 && !isTerminal(board)) {
             Move move = simulationPolicy(board);
             board.doMove(move);
+            depth--;
         }
         return evaluate(board);
     }
@@ -102,7 +113,9 @@ public class MCTS {
             return 0;
         }
         else {
-            return 0; // todo: maybe eval if limiting simulation depth
+            double reward = EvaluationFunction.apply(board);
+            reward = reward * (board.getSideToMove() == side ? -1 : 1);
+            return reward;
         }
     }
 
