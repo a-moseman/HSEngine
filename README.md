@@ -2,7 +2,8 @@
 A chess engine using the Monte Carlo Tree Search as its framework.
 
 TODO:
-- Enpassant Love - Evaluation Function Feature
+- Evaluation Function Features
+    * Enpassant Love
 - Forced Enpassant - General
 - UCI Protocol - General
 
