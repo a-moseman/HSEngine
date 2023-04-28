@@ -3,9 +3,9 @@ package org.amoseman.HSEngine;
 import com.github.bhlangonijr.chesslib.Board;
 import com.github.bhlangonijr.chesslib.Piece;
 import com.github.bhlangonijr.chesslib.Side;
-import com.github.bhlangonijr.chesslib.Square;
 import com.github.bhlangonijr.chesslib.move.Move;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -62,7 +62,7 @@ public class MCTS {
         Board board = new Board();
         board.loadFromFen(node.POSITION);
         while (depth > 0 && !isTerminal(board)) {
-            Move move = simulationPolicy(board);
+            Move move = SimulationPolicy.apply(board);
             board.doMove(move);
             depth--;
         }
@@ -101,12 +101,6 @@ public class MCTS {
         double exploitationExpression = node.getReward() / node.getVisits();
         double explorationExpression = Math.sqrt(Math.log(node.PARENT.getVisits() + 1) / node.getVisits());
         return exploitationExpression + c * explorationExpression;
-    }
-
-    private static final Random RANDOM = new Random();
-    private Move simulationPolicy(Board board) {
-        List<Move> legalMoves = board.legalMoves();
-        return legalMoves.get(RANDOM.nextInt(legalMoves.size()));
     }
 
     private double evaluate(Board board) {
