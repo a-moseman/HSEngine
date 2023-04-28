@@ -8,11 +8,9 @@ import com.github.bhlangonijr.chesslib.Square;
 public class EvaluationFunction {
 
     public static double apply(Board board) {
-        double score =
-                materialBalance(board) * 75
-                + explosiveSquare(board) * 10
-                + checkLove(board) * 15;
-        return score / 100;
+        return materialBalance(board) * 0.75
+                + explosiveSquare(board) * 0.1
+                + checkLove(board) * 0.15;
     }
 
     private static final int[] PIECE_VALUES = new int[]{100, 300, 300, 500, 900, 0};
