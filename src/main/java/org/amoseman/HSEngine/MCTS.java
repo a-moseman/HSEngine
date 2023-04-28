@@ -26,7 +26,7 @@ public class MCTS {
     public void step() {
         Node selectedNode = selection();
         Node expandedNode = expansion(selectedNode);
-        int depth = (int) Math.log(steps + 1);
+        int depth = (int) Math.log(steps + 1) + 1;
         double reward = simulation(expandedNode, depth);
         backpropagation(expandedNode, reward);
         steps++;
@@ -36,8 +36,10 @@ public class MCTS {
 
     private Node selection() {
         Node node = root;
+        boolean asOpponent = false;
         while (isFullyExpanded(node)) {
-            node = treePolicy(node);
+            node = treePolicy(node, asOpponent);
+            asOpponent = !asOpponent;
         }
         return node;
     }
@@ -72,16 +74,23 @@ public class MCTS {
         if (node.PARENT == null) {
             return;
         }
-        backpropagation(node.PARENT, -reward);
+        backpropagation(node.PARENT, reward);
     }
 
     //---Policies---\\
 
-    private Node treePolicy(Node node) {
+    private Node treePolicy(Node node, boolean asOpponent) {
         int best = 0;
         for (int i = 0; i < node.CHILDREN.size(); i++) {
-            if (ucb(node.CHILDREN.get(i)) > ucb(node.CHILDREN.get(best))) {
-                best = i;
+            if (!asOpponent) {
+                if (ucb(node.CHILDREN.get(i)) > ucb(node.CHILDREN.get(best))) {
+                    best = i;
+                }
+            }
+            else {
+                if (ucb(node.CHILDREN.get(i)) < ucb(node.CHILDREN.get(best))) {
+                    best = i;
+                }
             }
         }
         return node.CHILDREN.get(best);
@@ -114,7 +123,7 @@ public class MCTS {
         }
         else {
             double reward = EvaluationFunction.apply(board);
-            reward = reward * (board.getSideToMove() == side ? -1 : 1);
+            reward = reward * (side == Side.WHITE ? 1 : -1);
             return reward;
         }
     }
